@@ -9,27 +9,31 @@ function Rubik(element, dimensions) {
   var width = element.innerWidth(),
       height = element.innerHeight();
 
-  var debug = true;
+  var debug = false;
+	  
+	
+               
 
   /*** three.js boilerplate ***/
   var scene = new THREE.Scene(),
       camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000),
       renderer = new THREE.WebGLRenderer({ antialias: true });
-
-  renderer.setClearColor(background, 1.0);
+		
+renderer.setClearColor(background, 20.0);
   renderer.setSize(width, height);
   renderer.shadowMapEnabled = true;
   element.append(renderer.domElement);
-
+	
   camera.position = new THREE.Vector3(-5, 5, 14);
   camera.lookAt(scene.position);
   THREE.Object3D._threexDomEvent.camera(camera);
-
+	
   /*** Lights ***/
   scene.add(new THREE.AmbientLight(0xffffff));
   //TODO: add a spotlight that takes the orbitcontrols into account to stay "static"
 
   /*** Camera controls ***/
+
   var orbitControl = new THREE.OrbitControls(camera, renderer.domElement);
 
   function enableCameraControl() {
@@ -129,6 +133,7 @@ function Rubik(element, dimensions) {
     'z': {'x': 'y', 'y': 'x'}
   }
 
+	
   var onCubeMouseUp = function(e, cube) {
 
     if(clickVector) {
@@ -187,7 +192,18 @@ function Rubik(element, dimensions) {
         onCubeMouseUp(e, lastCube);
     }
   });
+  /*** skybox ***/
 
+		var geometry = new THREE.SphereGeometry(100, 60, 40);
+
+		var skyBoxMaterial = new THREE.MeshBasicMaterial({ side: THREE.BackSide, map: THREE.ImageUtils.loadTexture('0005.jpg') });
+
+		skyBox = new THREE.Mesh(geometry, skyBoxMaterial);
+
+		scene.add(skyBox);	   
+  
+
+	
   /*** Build 27 cubes ***/
   //TODO: colour the insides of all of the faces black
   // (probably colour all faces black to begin with, then "whitelist" exterior faces)
@@ -223,6 +239,7 @@ function Rubik(element, dimensions) {
 				cube.on('mousedown', function(e) {
 					
 				  onCubeMouseDown(e, e.target);
+				  
 				});
 
 				cube.on('mouseup', function(e) {
@@ -259,7 +276,7 @@ function Rubik(element, dimensions) {
   //Are we in the middle of a transition?
   var isMoving = false,
       moveAxis, moveN, moveDirection,
-      rotationSpeed = 0.2;
+      rotationSpeed = 0.2	;
 
   //http://stackoverflow.com/questions/20089098/three-js-adding-and-removing-children-of-rotated-objects
   var pivot = new THREE.Object3D(),
@@ -291,6 +308,7 @@ function Rubik(element, dimensions) {
   }
 
   var startNextMove = function() {
+	
     var nextMove = moveQueue.pop();
 	
     if(nextMove) {
@@ -317,6 +335,12 @@ function Rubik(element, dimensions) {
           });
 
           currentMove = nextMove;
+		  /***  apply sound ***/
+		  audio = document.createElement('audio');
+		  source = document.createElement('source');
+			source.src = 'sound/cube1.mp3';
+			audio.appendChild(source);
+			audio.play();
         } else {
           console.log("Already moving!");
         }
